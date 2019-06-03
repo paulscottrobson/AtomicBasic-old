@@ -1,11 +1,11 @@
 
-; 64tass Turbo Assembler Macro V1.54.1900 listing file
-; 64tass --m65816 -f -q -o basic.bin -L basic.lst ..\source\start.asm
-; Mon Jun 03 17:15:15 2019
+; 64tass Turbo Assembler Macro V1.53.1515? listing file
+; tass64 --m65816 -f -q -o basic.bin -L basic.lst ../source/start.asm
+; Mon Jun  3 19:32:28 2019
 
 ;Offset	;Hex		;Monitor	;Source
 
-;******  Processing input file: ..\source\start.asm
+;******  Processing input file: ../source/start.asm
 
 .0000	18		clc			clc												; switch into 65816 16 bit mode.
 .0001	fb		xce			xce
@@ -19,11 +19,11 @@
 .0012	a0 00 c0	ldy #$c000		ldy 	#CodeEndSpace & $FFFF					; and the end address in Y ($C000)
 .0015	5c f5 03 01	jmp $0103f5		jmp 	SwitchBasicInstance
 
-;******  Processing file: ..\source\basic.asm
+;******  Processing file: ../source/basic.asm
 
 .010000					StartOfBasicCode:
 
-;******  Processing file: ..\source\temp/tokens.inc
+;******  Processing file: ../source/temp/tokens.inc
 
 .010000					CommandJumpTable:
 >010000	11 04					.word IllegalToken & $FFFF ; for the $0000 token.
@@ -117,10 +117,10 @@
 =$781c					rparenTokenID                    = $781c
 =$7c1d					letTokenID                       = $7c1d
 
-;******  Return to file: ..\source\basic.asm
+;******  Return to file: ../source/basic.asm
 
 
-;******  Processing file: ..\source\temp/block.inc
+;******  Processing file: ../source/temp/block.inc
 
 =$0010					BlockFastVariables = $0010
 =$0080					BlockHashTable = $0080
@@ -130,10 +130,10 @@
 =$00c0					BlockProgranStart = $00c0
 =$7b62ce4a				BlockProtectMarker = $7b62ce4a
 
-;******  Return to file: ..\source\basic.asm
+;******  Return to file: ../source/basic.asm
 
 
-;******  Processing file: ..\source\data.asm
+;******  Processing file: ../source/data.asm
 
 =$00					DPBaseAddress = $00 						; Base address used for direct page.
 =$00					DPageNumber = DPBaseAddress 				; page number of workspace area
@@ -150,10 +150,10 @@
 =16					EXSValueH = 16  							; High word
 =32					EXSPrecedence = 32							; Precedence
 
-;******  Return to file: ..\source\basic.asm
+;******  Return to file: ../source/basic.asm
 
 
-;******  Processing file: ..\source\expression.asm
+;******  Processing file: ../source/expression.asm
 
 .01008b					Evaluate:
 .01008b	a2 00 01	ldx #$0100			ldx 	#EXSBase					; reset the stack base
@@ -322,10 +322,10 @@
 .0101b6	ca		dex				dex
 .0101b7	60		rts				rts
 
-;******  Return to file: ..\source\basic.asm
+;******  Return to file: ../source/basic.asm
 
 
-;******  Processing file: ..\source\binary/arithmetic.asm
+;******  Processing file: ../source/binary/arithmetic.asm
 
 .0101b8					Binary_Add:
 .0101b8	18		clc			clc
@@ -368,10 +368,10 @@
 .0101f1					_Binary_SLExit:
 .0101f1	60		rts			rts
 
-;******  Return to file: ..\source\basic.asm
+;******  Return to file: ../source/basic.asm
 
 
-;******  Processing file: ..\source\binary/bitwise.asm
+;******  Processing file: ../source/binary/bitwise.asm
 
 .0101f2					Binary_And:
 .0101f2	b5 00		lda $00,x		lda		EXSValueL+0,x
@@ -398,10 +398,10 @@
 .010216	95 10		sta $10,x		sta 	EXSValueH+0,x
 .010218	60		rts			rts
 
-;******  Return to file: ..\source\basic.asm
+;******  Return to file: ../source/basic.asm
 
 
-;******  Processing file: ..\source\binary/comparison.asm
+;******  Processing file: ../source/binary/comparison.asm
 
 .010219					Binary_Equals:
 .010219	b5 00		lda $00,x		lda 	EXSValueL,x 					; numeric comparison
@@ -473,10 +473,10 @@
 .01028d	f0 b8		beq $010247		beq 	Compare_Succeed
 .01028f	80 be		bra $01024f		bra 	Compare_Fail
 
-;******  Return to file: ..\source\basic.asm
+;******  Return to file: ../source/basic.asm
 
 
-;******  Processing file: ..\source\binary/divide.asm
+;******  Processing file: ../source/binary/divide.asm
 
 .010291					Binary_Divide:
 .010291	b5 02		lda $02,x		lda 	EXSValueL+2,x						; check for division by zero
@@ -548,10 +548,10 @@
 .01030e	95 10		sta $10,x		sta 	EXSValueH+0,x
 .010310	60		rts			rts
 
-;******  Return to file: ..\source\basic.asm
+;******  Return to file: ../source/basic.asm
 
 
-;******  Processing file: ..\source\binary/multiply.asm
+;******  Processing file: ../source/binary/multiply.asm
 
 .010311					Binary_Multiply:
 .010311	b5 00		lda $00,x		lda 	EXSValueL+0,x 						; multiplier to DTemp1, multiplicand in Value+2
@@ -583,10 +583,10 @@
 .010341					_BinaryMultiply_Exit:
 .010341	60		rts			rts
 
-;******  Return to file: ..\source\basic.asm
+;******  Return to file: ../source/basic.asm
 
 
-;******  Processing file: ..\source\unary/simpleunary.asm
+;******  Processing file: ../source/unary/simpleunary.asm
 
 .010342					Function_Len:
 .010342	20 a2 01	jsr $0101a2			jsr 	EvaluateNext 				; get the value you are absoluting
@@ -675,7 +675,7 @@
 .0103f2	45 16		eor $16				eor 	DRandom+2
 .0103f4	60		rts				rts
 
-;******  Return to file: ..\source\basic.asm
+;******  Return to file: ../source/basic.asm
 
 .0103f5					SwitchBasicInstance:
 .0103f5	c2 30		rep #$30		rep 	#$30 									; 16 bit AX mode.
@@ -717,7 +717,7 @@
 >01043f	4d 69 73 73 69 6e 67 20			.text	"Missing ~",0
 >010447	7e 00
 
-;******  Return to file: ..\source\start.asm
+;******  Return to file: ../source/start.asm
 
 .024000					CodeSpace:
 >024000	42 41 53 43 00 00 00 00			.binary "temp/basic.bin"
