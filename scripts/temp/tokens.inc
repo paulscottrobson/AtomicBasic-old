@@ -25,7 +25,7 @@ CommandJumpTable:
 	.word Function_Random          & $FFFF ; token $7414 "rnd()"
 	.word Function_Sgn             & $FFFF ; token $7415 "sgn("
 	.word Function_Abs             & $FFFF ; token $7416 "abs("
-	.word IllegalToken             & $FFFF ; token $7417 "len("
+	.word Function_Len             & $FFFF ; token $7417 "len("
 	.word IllegalToken             & $FFFF ; token $7818 ","
 	.word IllegalToken             & $FFFF ; token $7819 ";"
 	.word IllegalToken             & $FFFF ; token $781a ":"

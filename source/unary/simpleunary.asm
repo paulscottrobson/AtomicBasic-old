@@ -11,6 +11,32 @@
 
 ; *******************************************************************************************
 ;
+;										len(s) => length
+;
+; *******************************************************************************************
+
+Function_Len: ;; len(
+		jsr 	EvaluateNext 				; get the value you are absoluting
+		sta 	DTemp1 						; save address
+		sty 	DTemp1+2		
+		lda 	#RParenTokenID 				; check )
+		jsr 	CheckNextToken
+		ldy 	#0
+_FLenFindEnt:
+		lda 	[DTemp1],y 					; read the next character
+		and 	#$00FF 						; look at LSB only
+		beq 	_FLEndFound
+		iny 								; do 64k maximum
+		bne 	_FLenFindEnt
+		jsr 	ReportError
+		.text 	"Len() used on non string",0
+_FLEndFound:
+		sty 	EXSValueL+0,x 				; save length.
+		stz 	EXSValueH+0,x
+		rts
+
+; *******************************************************************************************
+;
 ;									abs s => absolute value
 ;
 ; *******************************************************************************************

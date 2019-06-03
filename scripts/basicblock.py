@@ -264,6 +264,6 @@ BasicBlock.HASHMASK = 15 														# Hash mask (0,1,3,7,15)
 
 if __name__ == "__main__":
 	blk = BasicBlock(0x4000,0x8000)
-	blk.addBASICLine(10,'a="hello"+1')
+	blk.addBASICLine(10,'a=3+!4+2')
 	blk.export("temp/basic.bin")	
 	blk.exportConstants("temp/block.inc")

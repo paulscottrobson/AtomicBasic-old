@@ -136,15 +136,19 @@ _ELExit:
 		ldy 	EXSValueH+0,x
 		rts
 ;
-;		Code to handle non-constant atoms : - ( and Unary Functions 001xx and Identifiers 01xx
+;		Code to handle non-constant atoms : - ( ! ? and Unary Functions 001xx and Identifiers 01xx
 ;
 _ELKeywordFunction:
 		cmp 	#$4000 							; identifier (e.g. variable) if in range $2000-$3FFF
 		bcc 	_ELVariable 					; (we've already discounted 8000-FFFF)
-		cmp 	#minusTokenID 					; special case keywords -(atom) (expression)
+		cmp 	#minusTokenID 					; special case keywords -(atom) (expression) ! ? indirection
 		beq 	_ELMinusAtom
 		cmp 	#lparenTokenID
 		beq 	_ELParenthesis
+		cmp 	#questionTokenID 
+		beq 	_ELByteIndirection
+		cmp 	#plingTokenID 
+		beq 	_ELWordIndirection
 		tay 									; save token in Y
 		and 	#$FC00 							; look for 0111 01xx ? i.e. a unary function.
 		cmp 	#$7400 							; if it isn't then exit
@@ -185,12 +189,7 @@ _ELParenthesis:
 _ELMinusAtom:
 		inc 	DCodePtr 						; skip over the - token
 		inc 	DCodePtr
-		inx 									; make space
-		inx
-		lda 	#8<<10 							; means binary operation will be impossible.
-		jsr 	EvaluateLevel
-		dex
-		dex
+		jsr 	EvaluateNextAtom
 		sec 									; do the subtraction
 		lda 	#0
 		sbc 	EXSValueL+2,x
@@ -198,7 +197,36 @@ _ELMinusAtom:
 		lda 	#0
 		sbc 	EXSValueH+2,x
 		sta 	EXSValueH+0,x
-		jmp 	_ELGotAtom
+		brl 	_ELGotAtom
+;
+;		Handle ?<atom> byte indirection
+;
+_ELByteIndirection:
+		inc 	DCodePtr 						; skip over the - token
+		inc 	DCodePtr
+		jsr 	EvaluateNextAtom
+		sta 	DTemp1+0 						; save address to indirect over.
+		sty 	DTemp1+2
+		lda 	[DTemp1] 						; read the word there
+		and 	#$00FF 							; make a byte
+		sta 	EXSValueL+0,x 					; write it back
+		stz 	EXSValueH+0,x
+		brl 	_ELGotAtom
+;
+;		Handle !<atom> word indirection
+;
+_ELWordIndirection:
+		inc 	DCodePtr 						; skip over the - token
+		inc 	DCodePtr
+		jsr 	EvaluateNextAtom
+		sta 	DTemp1+0 						; save address to indirect over.
+		sty 	DTemp1+2
+		lda 	[DTemp1] 						; read the word there
+		sta 	EXSValueL+0,x 					; write it back
+		ldy 	#2 		
+		lda 	[DTemp1],y
+		sta 	EXSValueH+0,x
+		brl 	_ELGotAtom
 
 ; *******************************************************************************************
 ;
@@ -214,5 +242,20 @@ EvaluateNext:
 		lda 	#0<<10 							; lowest precedence.
 		jsr 	EvaluateLevel 					; do at next level
 		dex 									; reset stack
+		dex
+		rts
+
+; *******************************************************************************************
+;
+;			As EvaluateNext, but gets an Atomic value, not a full expression.
+;
+; *******************************************************************************************
+
+EvaluateNextAtom:
+		inx 									; make space
+		inx
+		lda 	#8<<10 							; means binary operation will be impossible.
+		jsr 	EvaluateLevel
+		dex
 		dex
 		rts
