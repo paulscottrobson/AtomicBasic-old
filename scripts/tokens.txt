@@ -1,0 +1,35 @@
+## ********************************************************************************
+##
+##							Tokens defined in Basic
+##
+## ********************************************************************************
+
+[0]
+	& | ^ 										## bitwise operators.
+
+[1]	
+	< 	> 	= 	<= 	>= 	<> 						## signed comparators
+
+[2]
+	+	- 										## additive operators
+
+[3]	
+	*		/		%							## multiply and divide, modulus, signed
+	>> 		<< 									## logical shift left and right, zeros shifted in
+
+[4]
+	?		! 		$ 							## Indirection operators
+
+[unary]
+	rnd() 										## random number 32 bit							
+	sgn( 	abs( 	len(	 					## standard
+	
+[syntax]
+	, 	;	:	(	)
+
+[keyword]										
+	let  										## assignment	
+
+##
+##	Keywords to do :
+##

@@ -1,0 +1,9 @@
+TODO:-
+	LEN(<string>) function
+	Unary Indirection in expression.asm
+	Indirection binary Functions 
+	Variable handler.
+
+Outstanding:
+	Expand Expression stack from little test one.
+	Check Expression complexity.
