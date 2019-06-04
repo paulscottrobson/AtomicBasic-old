@@ -26,6 +26,7 @@
 	
 [syntax]
 	, 	;	:	(	)
+	#											## This token makes the next constant be output in hex.
 
 [keyword]										
 	let  										## assignment	

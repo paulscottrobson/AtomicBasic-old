@@ -100,6 +100,7 @@ class TokenList(object):
 		n = n.replace("(","lparen").replace(")","rparen").replace(",","comma").replace(":","colon")
 		n = n.replace("$","dollar").replace("?","question").replace("!","pling").replace("'","squote")
 		n = n.replace("|","bar").replace("^","hat").replace("&","ampersand").replace("%","percent")
+		n = n.replace("#","hash")
 		assert re.match("^([a-zA-Z]+)$",n) is not None,"error in constant naming "+n
 		return n.lower()
 	#

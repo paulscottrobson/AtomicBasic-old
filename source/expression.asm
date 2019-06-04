@@ -38,6 +38,7 @@ Evaluate:
 
 EvaluateLevel:
 		sta 	EXSPrecedence+0,x 				; save precedence level, also sets type to integer.
+_ELGetNext:
 		lda 	(DCodePtr)						; look at the next token
 		beq 	_ELExpressionSyntax 			; EOL token, there's an error.
 		bmi 	_ELConstant 					; 8000-FFFF constant.
@@ -149,6 +150,8 @@ _ELKeywordFunction:
 		beq 	_ELByteIndirection
 		cmp 	#plingTokenID 
 		beq 	_ELWordIndirection
+		cmp 	#hashTokenID 					; # is ignored, it is an instruction to the detokeniser
+		beq 	_ELIgnoreToken
 		tay 									; save token in Y
 		and 	#$FC00 							; look for 0111 01xx ? i.e. a unary function.
 		cmp 	#$7400 							; if it isn't then exit
@@ -161,6 +164,14 @@ _ELUnaryFunction:
 		inc 	DCodePtr
 		tya 									; get token back
 		bra 	_ELExecuteA 					; and execute it.
+;
+;		Ignore the token and loop back. Used for '#' which is an instruction to the detokeniser
+;		to output the next constant in hexadecimal.
+;	
+_ELIgnoreToken:
+		inc 	DCodePtr 						; skip over the token to ignore
+		inc 	DCodePtr
+		brl 	_ELGetNext 						
 ;
 ;		Handle variable (sequence of identifier tokens)
 ;

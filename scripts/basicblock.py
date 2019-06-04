@@ -150,13 +150,12 @@ class BasicBlock(object):
 		value = initValue														# put this in
 		if memoryAllocated != 0:												# if not allocating memory for it
 			assert memoryAllocated > 0 and memoryAllocated % 2 == 0 			# check size
-			actual = memoryAllocated+6 if self.isProtected else memoryAllocated	# allow for protection
+			actual = memoryAllocated+4 if self.isProtected else memoryAllocated	# allow for protection
 			malloc = self.allocateLowMemory(actual)								# alloc memory
 			if self.isProtected:
-				self.writeWord(malloc+0,BasicBlock.PROTECTMARKER & 0xFFFF)		# protection marker
-				self.writeWord(malloc+2,BasicBlock.PROTECTMARKER >> 16)
-				self.writeWord(malloc+4,memoryAllocated)						# size of memory
-				malloc += 6 													# skip over
+				self.writeWord(malloc+0,memoryAllocated)						# size of memory
+				self.writeWord(malloc+2,BasicBlock.PROTECTMARKER & 0xFFFF)		# protection marker
+				malloc += 4 													# skip over
 			for i in range(0,memoryAllocated,4):								# initaialise data memory
 				self.writeWord(malloc+i+0,initValue & 0xFFFF)
 				self.writeWord(malloc+i+2,initValue >> 16)
@@ -222,11 +221,12 @@ class BasicBlock(object):
 				while ptr != 0:													# show variables in list
 					value = self.readLong(ptr+4)
 					h.write("\t${0:04x} {1} = {2} ${2:x}\n".format(ptr,self.decodeIdentifier(self.readWord(ptr+2)),value))
-					if value > self.baseAddress+6 and value < self.endAddress:	# check to see if a string/int sequence.
-						if self.readLong(value-6) == BasicBlock.PROTECTMARKER:	# because the marker is there
-							size = self.readWord(value-2)
+					if value > self.baseAddress+4 and value < self.endAddress:	# check to see if a string/int sequence.
+						if self.readWord(value-2) == BasicBlock.PROTECTMARKER:	# because the marker is there
+							size = self.readWord(value-4)
 							h.write("\t\t{0} bytes {1} words\n".format(size,size >> 2))
-							h.write("\t\t\t{0}\n".format(self.wordData(value,size >> 2)))
+							h.write("\t\t{0}\n".format(self.wordData(value,size >> 2)))
+							h.write("\t\t{0}\n".format(self.charData(value,size)))
 					ptr = self.readWord(ptr)									# follow list
 	#
 	#		Convert identifier at address
@@ -251,10 +251,19 @@ class BasicBlock(object):
 	#
 	def wordData(self,addr,count):
 		words = [self.readLong(addr+i*4) for i in range(0,count)]
-		return " ".join(["${0:x}".format(x) for x in words])
+		return "["+",".join(["${0:x}".format(x) for x in words])+"]"
+	#
+	#		Data as characters/numbers
+	#
+	def charData(self,addr,count):
+		chars = [self.readLong(addr+i) & 0xFF for i in range(0,count)]
+		return '"'+"".join([self.convCharData(c) for c in chars])+'"'
+	#
+	def convCharData(self,c):
+		return "${0:02x}".format(c) if c < 32 or c > 127 else chr(c)
 
 BasicBlock.ID = "BASC"															# ID
-BasicBlock.PROTECTMARKER = 0x7B62CE4A											# Protected marker.
+BasicBlock.PROTECTMARKER = 0xCE4A												# Protected marker.
 BasicBlock.FASTVARIABLES = 0x10 												# Fast Variable Base
 BasicBlock.HASHTABLE = 0x80 													# Hash Table Base
 BasicBlock.LOWPTR = 0xA0 														# Low Memory Allocation
@@ -264,6 +273,9 @@ BasicBlock.HASHMASK = 15 														# Hash mask (0,1,3,7,15)
 
 if __name__ == "__main__":
 	blk = BasicBlock(0x4000,0x8000)
-	blk.addBASICLine(10,'a=3+!4+2')
+	blk.addBASICLine(10,'x=42*len("hello")')
+	blk.createVariable("w1",42)
+	blk.createVariable("arr1",42,12)
+	blk.listVariables()
 	blk.export("temp/basic.bin")	
 	blk.exportConstants("temp/block.inc")

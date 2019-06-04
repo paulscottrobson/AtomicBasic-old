@@ -62,6 +62,7 @@ SyntaxError:
 	.text 	"Syntax Error",0
 	
 ReportError:
+	rep 	#$30 									; reset mode.
 	nop
 	bra 	ReportError
 

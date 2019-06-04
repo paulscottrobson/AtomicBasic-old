@@ -1,7 +1,10 @@
 TODO:-
-	Indirection binary Functions 
+	Indirection binary Functions ? ! $
 	Variable handler.
+	Indirection Protection to a?b a!b a$b
 
 Outstanding:
 	Expand Expression stack from little test one.
-	Check Expression complexity.
+	Check Expression complexity (e.g. stack depth)
+	# operator in tokeniser is ignored but in detokenising constant does it in hex.
+	Signed modulus.

@@ -31,7 +31,8 @@ CommandJumpTable:
 	.word IllegalToken             & $FFFF ; token $781a ":"
 	.word IllegalToken             & $FFFF ; token $781b "("
 	.word IllegalToken             & $FFFF ; token $781c ")"
-	.word IllegalToken             & $FFFF ; token $7c1d "let"
+	.word IllegalToken             & $FFFF ; token $781d "#"
+	.word IllegalToken             & $FFFF ; token $7c1e "let"
 
 ;
 ;	Token text table. Byte is typeID[7:4] length[3:0]
@@ -65,7 +66,8 @@ TokenText:
 	 .text $e2,":"        ; token $781a
 	 .text $e2,"("        ; token $781b
 	 .text $e2,")"        ; token $781c
-	 .text $f4,"let"      ; token $7c1d
+	 .text $e2,"#"        ; token $781d
+	 .text $f4,"let"      ; token $7c1e
 	.byte $00
 
 ;
@@ -99,4 +101,5 @@ semicolonTokenID                 = $7819
 colonTokenID                     = $781a
 lparenTokenID                    = $781b
 rparenTokenID                    = $781c
-letTokenID                       = $7c1d
+hashTokenID                      = $781d
+letTokenID                       = $7c1e
