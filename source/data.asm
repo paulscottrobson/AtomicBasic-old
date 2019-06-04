@@ -26,11 +26,17 @@ DCodePtr = DPBaseAddress+6 					; address of code - current token.
 
 DTemp1 = DPBaseAddress + 8 					; *** LONG *** Temporary value
 DTemp2 = DPBaseAddress + 12 				; *** LONG *** Temporary value
+
 DSignCount = DPBaseAddress + 16 			; Sign count in division.
 DConstantShift = DPBaseAddress + 18 		; Constant Shift
-
 DRandom = DPBaseAddress + 20 				; *** LONG *** Random Seed
 
+; ********************************************************************************
+;
+;		Expression stack : Each entry is a word size, and there are three
+;		run in parallel - the low word, the high word, and the precedence level.
+;
+; ********************************************************************************
 
 
 EXSBase = $100 								; Initial value of X at lowest stack level.

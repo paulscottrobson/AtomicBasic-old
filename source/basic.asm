@@ -14,7 +14,8 @@ StartOfBasicCode:
 	.include "temp/tokens.inc"						; tokens include file (generated)
 	.include "temp/block.inc"						; block constants include file (generated)
 	.include "data.asm" 							; data definition.
-	.include "expression.asm"
+	.include "expression.asm" 						; expression evaluation.
+	.include "utility.asm" 							; utility routines
 	.include "binary/arithmetic.asm"				; binary arithmetic/string operators
 	.include "binary/bitwise.asm"
 	.include "binary/comparison.asm"
@@ -53,26 +54,3 @@ SwitchBasicInstance:
 halt1:
 	cop 	#0
 	bra 	halt1
-
-IllegalToken:
-	jsr 	ReportError
-	.text 	"Bad token",0
-SyntaxError:
-	jsr 	ReportError
-	.text 	"Syntax Error",0
-	
-ReportError:
-	rep 	#$30 									; reset mode.
-	nop
-	bra 	ReportError
-
-CheckNextToken:
-	cmp 	(DCodePtr)
-	bne 	_CTKError
-	inc 	DCodePtr
-	inc 	DCodePtr
-	rts	
-_CTKError:
-	sta 	DTemp1
-	jsr 	ReportError
-	.text	"Missing ~",0

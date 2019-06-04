@@ -24,13 +24,14 @@ Evaluate:
 		ldx 	#EXSBase					; reset the stack base
 		lda 	#0<<10 						; current precedence level.
 											; fall through.
+
 ; *******************************************************************************************
 ;
 ;		Evaluate a term/operator sequence at the current precedence level. A contains the
 ;		precedence level shifted 10 left (matching the keyword position). X contains the 
 ;		expression stack offset.
 ;
-;		Returns value in YA and CS if string.
+;		Returns value in YA.
 ;
 ;		Precedence climber : See expression.py in documents
 ;
