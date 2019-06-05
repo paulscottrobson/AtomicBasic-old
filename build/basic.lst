@@ -1,11 +1,11 @@
 
-; 64tass Turbo Assembler Macro V1.53.1515? listing file
-; tass64 --m65816 -f -q -o basic.bin -L basic.lst ../source/start.asm
-; Tue Jun  4 16:08:40 2019
+; 64tass Turbo Assembler Macro V1.54.1900 listing file
+; 64tass --m65816 -f -q -o basic.bin -L basic.lst ..\source\start.asm
+; Wed Jun 05 00:09:43 2019
 
 ;Offset	;Hex		;Monitor	;Source
 
-;******  Processing input file: ../source/start.asm
+;******  Processing input file: ..\source\start.asm
 
 .0000	18		clc			clc												; switch into 65816 16 bit mode.
 .0001	fb		xce			xce
@@ -19,11 +19,11 @@
 .0012	a0 00 c0	ldy #$c000		ldy 	#CodeEndSpace & $FFFF					; and the end address in Y ($C000)
 .0015	5c 44 04 01	jmp $010444		jmp 	SwitchBasicInstance
 
-;******  Processing file: ../source/basic.asm
+;******  Processing file: ..\source\basic.asm
 
 .010000					StartOfBasicCode:
 
-;******  Processing file: ../source/temp/tokens.inc
+;******  Processing file: ..\source\temp/tokens.inc
 
 .010000					CommandJumpTable:
 >010000	c8 01					.word IllegalToken & $FFFF ; for the $0000 token.
@@ -120,10 +120,10 @@
 =$781d					hashTokenID                      = $781d
 =$7c1e					letTokenID                       = $7c1e
 
-;******  Return to file: ../source/basic.asm
+;******  Return to file: ..\source\basic.asm
 
 
-;******  Processing file: ../source/temp/block.inc
+;******  Processing file: ..\source\temp/block.inc
 
 =$0010					BlockFastVariables = $0010
 =$0080					BlockHashTable = $0080
@@ -131,12 +131,11 @@
 =$00a0					BlockLowMemoryPtr = $00a0
 =$00a2					BlockHighMemoryPtr = $00a2
 =$00c0					BlockProgranStart = $00c0
-=$ce4a					BlockProtectMarker = $ce4a
 
-;******  Return to file: ../source/basic.asm
+;******  Return to file: ..\source\basic.asm
 
 
-;******  Processing file: ../source/data.asm
+;******  Processing file: ..\source\data.asm
 
 =$00					DPBaseAddress = $00 						; Base address used for direct page.
 =$00					DPageNumber = DPBaseAddress 				; page number of workspace area
@@ -153,10 +152,10 @@
 =16					EXSValueH = 16  							; High word
 =32					EXSPrecedence = 32							; Precedence
 
-;******  Return to file: ../source/basic.asm
+;******  Return to file: ..\source\basic.asm
 
 
-;******  Processing file: ../source/expression.asm
+;******  Processing file: ..\source\expression.asm
 
 .01008f					Evaluate:
 .01008f	a2 00 01	ldx #$0100			ldx 	#EXSBase					; reset the stack base
@@ -332,10 +331,10 @@
 .0101c6	ca		dex				dex
 .0101c7	60		rts				rts
 
-;******  Return to file: ../source/basic.asm
+;******  Return to file: ..\source\basic.asm
 
 
-;******  Processing file: ../source/utility.asm
+;******  Processing file: ..\source\utility.asm
 
 .0101c8					IllegalToken:
 .0101c8	20 e5 01	jsr $0101e5			jsr 	ReportError
@@ -362,10 +361,10 @@
 >0101f9	4d 69 73 73 69 6e 67 20				.text	"Missing token",0
 >010201	74 6f 6b 65 6e 00
 
-;******  Return to file: ../source/basic.asm
+;******  Return to file: ..\source\basic.asm
 
 
-;******  Processing file: ../source/binary/arithmetic.asm
+;******  Processing file: ..\source\binary/arithmetic.asm
 
 .010207					Binary_Add:
 .010207	18		clc			clc
@@ -408,10 +407,10 @@
 .010240					_Binary_SLExit:
 .010240	60		rts			rts
 
-;******  Return to file: ../source/basic.asm
+;******  Return to file: ..\source\basic.asm
 
 
-;******  Processing file: ../source/binary/bitwise.asm
+;******  Processing file: ..\source\binary/bitwise.asm
 
 .010241					Binary_And:
 .010241	b5 00		lda $00,x		lda		EXSValueL+0,x
@@ -438,10 +437,10 @@
 .010265	95 10		sta $10,x		sta 	EXSValueH+0,x
 .010267	60		rts			rts
 
-;******  Return to file: ../source/basic.asm
+;******  Return to file: ..\source\basic.asm
 
 
-;******  Processing file: ../source/binary/comparison.asm
+;******  Processing file: ..\source\binary/comparison.asm
 
 .010268					Binary_Equals:
 .010268	b5 00		lda $00,x		lda 	EXSValueL,x 					; numeric comparison
@@ -513,10 +512,10 @@
 .0102dc	f0 b8		beq $010296		beq 	Compare_Succeed
 .0102de	80 be		bra $01029e		bra 	Compare_Fail
 
-;******  Return to file: ../source/basic.asm
+;******  Return to file: ..\source\basic.asm
 
 
-;******  Processing file: ../source/binary/divide.asm
+;******  Processing file: ..\source\binary/divide.asm
 
 .0102e0					Binary_Divide:
 .0102e0	b5 02		lda $02,x		lda 	EXSValueL+2,x						; check for division by zero
@@ -588,10 +587,10 @@
 .01035d	95 10		sta $10,x		sta 	EXSValueH+0,x
 .01035f	60		rts			rts
 
-;******  Return to file: ../source/basic.asm
+;******  Return to file: ..\source\basic.asm
 
 
-;******  Processing file: ../source/binary/multiply.asm
+;******  Processing file: ..\source\binary/multiply.asm
 
 .010360					Binary_Multiply:
 .010360	b5 00		lda $00,x		lda 	EXSValueL+0,x 						; multiplier to DTemp1, multiplicand in Value+2
@@ -623,10 +622,10 @@
 .010390					_BinaryMultiply_Exit:
 .010390	60		rts			rts
 
-;******  Return to file: ../source/basic.asm
+;******  Return to file: ..\source\basic.asm
 
 
-;******  Processing file: ../source/unary/simpleunary.asm
+;******  Processing file: ..\source\unary/simpleunary.asm
 
 .010391					Function_Len:
 .010391	20 b2 01	jsr $0101b2			jsr 	EvaluateNext 				; get the value you are absoluting
@@ -715,7 +714,7 @@
 .010441	45 16		eor $16				eor 	DRandom+2
 .010443	60		rts				rts
 
-;******  Return to file: ../source/basic.asm
+;******  Return to file: ..\source\basic.asm
 
 .010444					SwitchBasicInstance:
 .010444	c2 30		rep #$30		rep 	#$30 									; 16 bit AX mode.
@@ -735,7 +734,7 @@
 .01045c	02 00		cop #$00		cop 	#0
 .01045e	80 fc		bra $01045c		bra 	halt1
 
-;******  Return to file: ../source/start.asm
+;******  Return to file: ..\source\start.asm
 
 .024000					CodeSpace:
 >024000	42 41 53 43 00 00 00 00			.binary "temp/basic.bin"
@@ -743,16 +742,16 @@
 ;	...repeated 6 times (96 bytes)...
 >024078	00 00 00 00 00 00 00 00 00 00 00 00 00 00 e0 40
 >024088	00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->024098	00 00 e8 40 00 00 00 00 00 41 fa bf 00 00 00 00
+>024098	00 00 e8 40 00 00 00 00 f0 40 ee bf 00 00 00 00
 >0240a8	00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
 >0240b8	00 00 00 00 00 00 00 00 1a 00 0a 80 38 20 06 44
 >0240c8	2a 80 0c 4c 17 74 08 00 68 65 6c 6c 6f 00 1c 78
 >0240d8	00 00 00 00 ee ee ee ee 00 00 fe bf 2a 00 00 00
->0240e8	00 00 fa bf f4 40 00 00 0c 00 4a ce 2a 00 00 00
->0240f8	2a 00 01 00 2a 00 02 00 00 00 00 00 00 00 00 00
->024108	00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+>0240e8	00 00 fa bf ee bf 00 00 00 00 00 00 00 00 00 00
+>0240f8	00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
 ;	...repeated 2030 times (32480 bytes)...
->02bff8	00 00 a1 3c 72 24 77 24
+>02bfe8	00 00 00 00 00 00 2a e2 00 00 2a e2 01 00 2a e2
+>02bff8	02 00 a1 3c 72 24 77 24
 .02c000					CodeEndSpace:
 
 ;******  End of listing

@@ -33,20 +33,14 @@ class BasicBlock(object):
 		self.debug = debug
 		self.tokeniser = Tokeniser()											# tokenises things
 		self.variables = {}														# variable info
-		self.isProtected = True
 		self.lastProgramLineNumber = 0
 	#
 	#	Write binary out
 	#
 	def export(self,fileName):
-		h = open(fileName,"wb")
+		h = open(fileName,"wb")													# write data as bytes
 		h.write(bytes(self.data))
 		h.close()
-	#
-	#	Set Protection
-	#
-	def setProtection(self,isProtected):
-		self.isProtected = isProtected
 	#
 	#	Erase all variables and code
 	#
@@ -55,16 +49,16 @@ class BasicBlock(object):
 			self.setFastVariable(chr(v),0)
 		self.writeWord(self.baseAddress+BasicBlock.HIGHPTR,self.endAddress)		# reset high memory
 		self.writeWord(self.baseAddress+BasicBlock.PROGRAM,0x0000)				# erase program
-		self.resetLowMemory()
+		self.resetLowMemory()													# reset low memory
 	#
 	#	Rewrite the spacer and low memory
 	#
 	def resetLowMemory(self):
 		ptr = self.baseAddress+BasicBlock.PROGRAM 								# Where code starts
 		while self.readWord(ptr) != 0x0000:										# follow the code link chain
-			ptr = ptr + self.readWord(ptr)
+			ptr = ptr + self.readWord(ptr)										# to the end.
 		self.writeWord(ptr+2,0xEEEE)											# write EEEE twice after it
-		self.writeWord(ptr+4,0xEEEE)
+		self.writeWord(ptr+4,0xEEEE)											# visibility marker.
 		self.writeWord(self.baseAddress+BasicBlock.LOWPTR,ptr+6)				# free memory starts here.
 		return ptr 																# return where next line goes
 	#
@@ -96,29 +90,30 @@ class BasicBlock(object):
 	#	Read a word from memory
 	#
 	def readWord(self,addr):
-		assert addr >= self.baseAddress and addr <= self.endAddress
-		addr = addr - self.baseAddress
-		return self.data[addr] + self.data[addr+1] * 256
+		assert addr >= self.baseAddress and addr <= self.endAddress 			# validate
+		addr = addr - self.baseAddress 											# offset in data
+		return self.data[addr] + self.data[addr+1] * 256 						# return it
 	#
 	#	Write a word to memory
 	#
 	def writeWord(self,addr,data):
-		assert addr >= self.baseAddress and addr <= self.endAddress
-		data = data & 0xFFFF
-		self.data[addr-self.baseAddress] = data & 0xFF
+		assert addr >= self.baseAddress and addr <= self.endAddress 			# validate it
+		data = data & 0xFFFF 													# force into 16 bit
+		self.data[addr-self.baseAddress] = data & 0xFF 							# store in structure
 		self.data[addr-self.baseAddress+1] = data >> 8
-		if self.debug:
-			print("{0:04x} {1:04x}".format(addr,data))
+		if self.debug:															# debug display
+			print("{0:04x} : {1:04x}".format(addr,data))
 	#
 	#	Read long as signed int
 	#
 	def readLong(self,addr):
-		val = self.readWord(addr)+(self.readWord(addr+2)<<16)
-		if (val & 0x80000000) != 0:
+		val = self.readWord(addr)+(self.readWord(addr+2) << 16)					# read as 32 bit unsigned
+		if (val & 0x80000000) != 0:												# convert to signed
 			val = val - 0x100000000
 		return val
 	#
-	#	Create a representation of an identifier in high memory.
+	#	Create a representation of an identifier in high memory. We normally use the identifier representation
+	#	in the program, but this is used for creating test code.
 	#
 	def createIdentifierReference(self,name):
 		assert re.match("^[\\@A-Z][\\@A-Z0-9]*$",name.upper()) is not None 		# check legal variable name
@@ -127,7 +122,7 @@ class BasicBlock(object):
 		addr = self.allocateHighMemory(len(tokens)*2)							# allocate high mem for name
 		for i in range(0,len(tokens)):											# copy it (normally in program)
 			self.writeWord(addr+i*2,tokens[i])
-		return addr
+		return addr 															# return its address
 	#
 	#	Get hash for name at given address
 	#
@@ -143,32 +138,26 @@ class BasicBlock(object):
 		self.memoryVariableCreated = True 										# can't add more code
 		name = name.lower()
 		assert name != "" and name not in self.variables 						# check ok / not exists
-		nameAddr = self.createIdentifierReference(name)							# create tokenised version
+		nameAddr = self.createIdentifierReference(name)							# create tokenised version in highmem
 		hashAddr = self.getHashEntry(nameAddr)									# get hash address for variable
 	
-		varAddr = self.allocateLowMemory(8)										# create memory for it
-		value = initValue														# put this in
+		varAddr = self.allocateLowMemory(8)										# create memory for it in low memory
 		if memoryAllocated != 0:												# if not allocating memory for it
 			assert memoryAllocated > 0 and memoryAllocated % 2 == 0 			# check size
-			actual = memoryAllocated+4 if self.isProtected else memoryAllocated	# allow for protection
-			malloc = self.allocateLowMemory(actual)								# alloc memory
-			if self.isProtected:
-				self.writeWord(malloc+0,memoryAllocated)						# size of memory
-				self.writeWord(malloc+2,BasicBlock.PROTECTMARKER & 0xFFFF)		# protection marker
-				malloc += 4 													# skip over
+			malloc = self.allocateHighMemory(memoryAllocated)					# allocate high memory for it.
 			for i in range(0,memoryAllocated,4):								# initaialise data memory
 				self.writeWord(malloc+i+0,initValue & 0xFFFF)
 				self.writeWord(malloc+i+2,initValue >> 16)
 				initValue += 0x10000
-			value = malloc 														# store this in variable
+			initValue = malloc 													# store this in variable
 
-		self.writeWord(varAddr+0,self.readWord(hashAddr))						# patch into hash linked list
+		self.writeWord(varAddr+0,self.readWord(hashAddr))						# next link is old link header
 		self.writeWord(varAddr+2,nameAddr)
-		value = value & 0xFFFFFFFF
-		self.writeWord(varAddr+4,value & 0xFFFF)								# write data or address of allocated
-		self.writeWord(varAddr+6,value >> 16)
-		self.variables[name] = { "address":varAddr,"allocated":memoryAllocated,"start":value }
-		self.writeWord(hashAddr,varAddr)
+		initValue = initValue & 0xFFFFFFFF 										# mask to 32 bits.
+		self.writeWord(varAddr+4,initValue & 0xFFFF)							# write data or address of allocated
+		self.writeWord(varAddr+6,initValue >> 16)
+		self.variables[name] = { "address":varAddr,"allocated":memoryAllocated,"start":initValue }
+		self.writeWord(hashAddr,varAddr) 										# link as first element in list.
 	#
 	#		Add a line of BASIC
 	#
@@ -199,7 +188,6 @@ class BasicBlock(object):
 		self._export("BlockLowMemoryPtr",BasicBlock.LOWPTR)
 		self._export("BlockHighMemoryPtr",BasicBlock.HIGHPTR)
 		self._export("BlockProgranStart",BasicBlock.PROGRAM)
-		self._export("BlockProtectMarker",BasicBlock.PROTECTMARKER)
 		self.handle.close()
 	#
 	def _export(self,name,value):
@@ -208,25 +196,27 @@ class BasicBlock(object):
 	#		List variables to a file object
 	#
 	def listVariables(self,h=sys.stdout):
+		h.write("Non Zero Fast Variables\n")
 		for r in range(ord("@"),ord("Z")+1):									# export non zero fast vars
-			addr = (r-ord('@'))*4+BasicBlock.FASTVARIABLES+self.baseAddress
-			value = self.readLong(addr)
+			addr = (r-ord('@'))*4+BasicBlock.FASTVARIABLES+self.baseAddress 	# address of fast variable
+			value = self.readLong(addr) 										# display it if nonzero
 			if value != 0:
-				h.write("{0} = {1} ${1:x} @${2:04x}\n".format(chr(r).lower(),value,addr))
+				h.write("\t${2:04x} {0} := {1} ${1:x}\n".format(chr(r).lower(),value,addr))
+		lowestHighMem = self.readWord(self.baseAddress+BasicBlock.HIGHPTR)		# lowest address used in high memory
 		for hn in range(0,BasicBlock.HASHMASK+1):								# work through hash table
 			hPtr = BasicBlock.HASHTABLE+hn*2+self.baseAddress 					# address of head pointer
 			ptr = self.readWord(hPtr)											# head pointer
 			if ptr != 0:														# if occupied, show head
-				h.write("Hash {0} Table at ${1:04x}\n".format(hn,hPtr))
+				h.write("Hash {0} Link at ${1:04x}\n".format(hn,hPtr))
 				while ptr != 0:													# show variables in list
 					value = self.readLong(ptr+4)
-					h.write("\t${0:04x} {1} = {2} ${2:x}\n".format(ptr,self.decodeIdentifier(self.readWord(ptr+2)),value))
-					if value > self.baseAddress+4 and value < self.endAddress:	# check to see if a string/int sequence.
-						if self.readWord(value-2) == BasicBlock.PROTECTMARKER:	# because the marker is there
-							size = self.readWord(value-4)
-							h.write("\t\t{0} bytes {1} words\n".format(size,size >> 2))
-							h.write("\t\t{0}\n".format(self.wordData(value,size >> 2)))
-							h.write("\t\t{0}\n".format(self.charData(value,size)))
+					h.write("\t${0:04x} {1} := {2} ${2:x}\n".format(ptr,self.decodeIdentifier(self.readWord(ptr+2)),value))
+					if value >= lowestHighMem and value < self.endAddress:		# check to see if a string/int sequence.
+						size = min(16,self.endAddress-value) 					# how much to display.
+						data = [self.readWord(value+x) & 0xFF for x in range(0,size)]
+						h.write("\t\t{0}\n".format(",".join(["{0:02x}".format(x) for x in data])))
+						ePos = size if data.index(0) < 0 else data.index(0)		# if string, where does it end ?
+						h.write("\t\t\"{0}\"".format("".join([chr(x) if x >= 32 and x < 128 else "." for x in data[:ePos]])))						
 					ptr = self.readWord(ptr)									# follow list
 	#
 	#		Convert identifier at address
@@ -237,33 +227,14 @@ class BasicBlock(object):
 		while not done:
 			v = self.readWord(idPtr)											# get next
 			idPtr = idPtr + 2
-			s = s + self._decodeChar(v)+self._decodeChar(v >> 6)				# convert to characters
+			s = s + self._decodeChar(v & 0x3F)+self._decodeChar((v>>6) & 0x3F)	# convert to characters
 			done = (v & 0x1000) == 0											# continue if bit 12 set
 		return s.lower()
 	#
-	#		Convert 6 bit char value back to ASCII
-	#
 	def _decodeChar(self,c):
-		c = c & 0x3F 															# 6 bits
 		return "" if c == 0 else chr(c+32)
-	#
-	#		Data as words
-	#
-	def wordData(self,addr,count):
-		words = [self.readLong(addr+i*4) for i in range(0,count)]
-		return "["+",".join(["${0:x}".format(x) for x in words])+"]"
-	#
-	#		Data as characters/numbers
-	#
-	def charData(self,addr,count):
-		chars = [self.readLong(addr+i) & 0xFF for i in range(0,count)]
-		return '"'+"".join([self.convCharData(c) for c in chars])+'"'
-	#
-	def convCharData(self,c):
-		return "${0:02x}".format(c) if c < 32 or c > 127 else chr(c)
 
 BasicBlock.ID = "BASC"															# ID
-BasicBlock.PROTECTMARKER = 0xCE4A												# Protected marker.
 BasicBlock.FASTVARIABLES = 0x10 												# Fast Variable Base
 BasicBlock.HASHTABLE = 0x80 													# Hash Table Base
 BasicBlock.LOWPTR = 0xA0 														# Low Memory Allocation
@@ -274,8 +245,9 @@ BasicBlock.HASHMASK = 15 														# Hash mask (0,1,3,7,15)
 if __name__ == "__main__":
 	blk = BasicBlock(0x4000,0x8000)
 	blk.addBASICLine(10,'x=42*len("hello")')
+	blk.setFastVariable('@',22)
 	blk.createVariable("w1",42)
-	blk.createVariable("arr1",42,12)
+	blk.createVariable("arr1",0xE22A,12)
 	blk.listVariables()
 	blk.export("temp/basic.bin")	
 	blk.exportConstants("temp/block.inc")
